@@ -1,0 +1,24 @@
+Robot num: 0
+GOAL ACHIEVED
+Work time: 150.97882652282715
+Travel distance: 16.08188421219328
+
+Robot num: 0
+GOAL ACHIEVED
+Work time: 129.93722796440125
+Travel distance: 16.20287325682247
+
+Robot num: 0
+GOAL ACHIEVED
+Work time: 131.09187054634094
+Travel distance: 16.146189042498584
+
+Robot num: 0
+GOAL ACHIEVED
+Work time: 136.10646057128906
+Travel distance: 16.439101690749876
+
+Robot num: 0
+GOAL ACHIEVED
+Work time: 111.23119258880615
+Travel distance: 16.18779582101441
