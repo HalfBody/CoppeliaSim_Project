@@ -1,5 +1,5 @@
 import math
-import server_req
+import server
 
 
 def get_target_angle(robot_position, target_position, robot_oriantation):
@@ -31,7 +31,7 @@ def get_target_dist(robot_position, target_position):
 
 
 def get_min_lidar(n):
-    temp_arr = server_req.get_lidar_data(n)
+    temp_arr = server.get_lidar_data(n)
     lidar_data = []
     for i in range(len(temp_arr)):
         if i >= 170 and i <= 514:

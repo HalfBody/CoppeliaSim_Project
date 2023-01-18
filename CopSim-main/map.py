@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import server_req
+
 import server
 import math
 
@@ -13,13 +13,15 @@ class mapping():
         lidar_data = sim.get_lidar_data()
 
         for i in range(len(lidar_data)):
-            if lidar_data[i] == 0 or lidar_data[i] > 3:
+            if lidar_data[i] < 0.01 or lidar_data[i] > 2:
                 continue
             else:
                 if i <= 342:
-                    angle = robot_rot - (135 * math.pi / 180 - i * ((270 * math.pi / 180) / 684)) 
+                    #angle = robot_rot - (135 * math.pi / 180 - i * ((270 * math.pi / 180) / 684))
+                    angle = robot_rot - (70 * math.pi / 180 - i * ((140 * math.pi / 180) / 684)) 
                 else:
-                    angle = robot_rot + (i * ((270 * math.pi / 180) / 684) - (135 * math.pi / 180)) 
+                    #angle = robot_rot + (i * ((270 * math.pi / 180) / 684) - (135 * math.pi / 180))
+                    angle = robot_rot + (i * ((140 * math.pi / 180) / 684) - (70 * math.pi / 180)) 
 
                 if angle >= math.pi:
                     angle = -2 * math.pi + robot_rot

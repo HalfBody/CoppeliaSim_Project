@@ -1,4 +1,4 @@
-import server_req
+
 import server
 
 import math
@@ -16,9 +16,10 @@ import os
 
 # запуск цикла управления 
 def main_control_loop(turn_points, control, target, n, map, sim):
+    
     # получение угла поворота робота
     rotation = sim.get_robot_rotation()
-    # описание модуля матс_оп
+
     # получение в цикле угла целевого направления    
     target_angle = math_op.get_target_angle(sim.get_robot_position(), target, rotation)
     # функция запуска СУ

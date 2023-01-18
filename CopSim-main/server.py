@@ -103,22 +103,14 @@ class sim():
         b=[]
         for i in range(int(len(ranges)/4)):
             b.append(struct.unpack('<f',ranges[4*i:4*(i+1)])[0])
-        print('len(b)')
-        print(len(b))
-        print(b)
+        print('server.get_lidar_data len(b): ', len(b))
+        #print(b)
         lidar = []
         for i in b:
-            if i == 0.0:
-                i = 1.5
-            if i >= 1.5:
-                i = 1.5
+            # if i == 0.0:
+            #     i = 1.5
+            # if i >= 1.5:
+            #     i = 1.5
             lidar.append(i)
         
-        #lid = []
-        #for i in range(len(lidar)):
-        #    #if i >= 190 and i <= 494:
-        #        lid.append(lidar[i])
-
-
-        #return lid
         return lidar
