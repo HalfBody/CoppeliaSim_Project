@@ -1,5 +1,5 @@
-import requests
 import math
+import requests
 
 
 def prepare_sim():

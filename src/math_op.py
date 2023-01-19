@@ -1,6 +1,5 @@
 import math
-import server_req
-import server
+from src import server
 
 
 def get_target_angle(robot_position, target_position, robot_oriantation):

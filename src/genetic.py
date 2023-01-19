@@ -1,9 +1,12 @@
-import fuzzy_logic_python
-import math
-import math_op_sim
-import numpy as np
+
 import time
+import math
 import random
+
+import numpy as np
+
+from src import fuzzy_logic_python
+from src import math_op_sim
 
 
 class Obstacle():

@@ -1,7 +1,6 @@
-import matplotlib.pyplot as plt
-import server_req
-import server
 import math
+import matplotlib.pyplot as plt
+
 
 class mapping():
     def __init__(self):

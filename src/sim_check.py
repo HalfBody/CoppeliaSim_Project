@@ -1,9 +1,11 @@
-import fuzzy_logic_python
+import time
 import math
-import math_op_sim
+
 import matplotlib.pyplot as plt
 import numpy as np
-import time
+
+from src import fuzzy_logic_python
+from src import math_op_sim
 
 
 class Obstacle():

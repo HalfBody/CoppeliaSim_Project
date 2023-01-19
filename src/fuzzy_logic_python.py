@@ -1,7 +1,4 @@
 from simpful import *
-import server_req
-import server
-import os
 
 
 class Fuzzy():
@@ -95,7 +92,7 @@ class Fuzzy():
         #r, rf, f, lf, l = [], [], [], [], []
         
 
-        #TestFile = open('xyz.txt','w')
+        #TestFile = open('./data/xyz.txt','w')
         #for i in lidar_data:
         #    TestFile.write(str(i))
         #    TestFile.write('\n')

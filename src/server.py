@@ -1,10 +1,10 @@
-from cmath import pi
-import time
-import sys
-import struct
-import os
-sys.path.append('remote_api/')
+#import sys
+#sys.path.append('remote_api/')
 
+import struct
+from math import pi
+
+# https://github.com/CoppeliaRobotics/zmqRemoteApi
 from zmqRemoteApi import RemoteAPIClient
 
 
