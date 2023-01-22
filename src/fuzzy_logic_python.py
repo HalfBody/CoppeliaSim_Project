@@ -106,23 +106,18 @@ class Fuzzy():
         rules.append('IF (target_angle IS F) THEN (speed IS normal)')
 
         self.FS.add_rules(rules)
-
-
-    def get_lidar_data(self, lidar_data):
-        lidar = np.array_split(lidar_data, 5)
-        var_data = [min(dist) for dist in lidar]
-                    
-        return var_data
         
         
     def fuz_log(self, lidar_data, target_angle):
-        var_data = self.get_lidar_data(lidar_data)
+        lidar = np.array_split(lidar_data, 5)
+        var_data = [min(dist) if min(dist) != 0.0 else 1.5 for dist in lidar]
+        print(var_data)
 
-        self.FS.set_variable("L", var_data[0])
-        self.FS.set_variable("LF", var_data[1])
+        self.FS.set_variable("L", var_data[4])
+        self.FS.set_variable("LF", var_data[3])
         self.FS.set_variable("F", var_data[2])
-        self.FS.set_variable("RF", var_data[3])
-        self.FS.set_variable("R", var_data[4])
+        self.FS.set_variable("RF", var_data[1])
+        self.FS.set_variable("R", var_data[0])
         self.FS.set_variable("target_angle", target_angle)
 
         return self.FS.Mamdani_inference(['angle', 'speed'])

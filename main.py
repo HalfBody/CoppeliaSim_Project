@@ -24,16 +24,10 @@ def control_loop(turn_points, control, target, n, map, sim):
     print('main_control_loop target_angle: ', target_angle)
 
     # получение значений лидара
-    lidar = sim.get_lidar_data()
-    lidar_cut = [
-        ray
-        if 0.01 < ray and ray <= 2.0 else 2.0
-        for ray in lidar
-    ]
+    lidar = sim.get_lidar_inv()
     
     # признак детекции препятствия
-    detect = True if min(lidar_cut) <= 1.5 else False
-    print(detect)
+    detect = True if min(lidar) < 1.5 else False
 
     # выбор сратегии 
     # либо уворот от препятствия (препятствие есть),
@@ -42,15 +36,15 @@ def control_loop(turn_points, control, target, n, map, sim):
     angle = 0.0
     if detect == False:
         print('Езда к цели')
-        speed = 3
-        if(abs(target_angle) >= 0.5):
+        speed = 2
+        if abs(target_angle) <= 0.5:
             angle = target_angle 
         else:
             angle = target_angle / abs(target_angle)
     else:
         print('Уворот от препятствия')
         # функция запуска СУ
-        fuz_control = control.fuz_log(lidar_cut, target_angle)
+        fuz_control = control.fuz_log(lidar, target_angle)
         # получение уставки на угол от СУ
         angle = fuz_control.get('angle')
         # получение уставки на скорость от СУ
@@ -61,12 +55,11 @@ def control_loop(turn_points, control, target, n, map, sim):
     # если уставка на угол велика - поворот без движения
     if abs(angle) < 0.0001:
         sim.move(speed, 0)
-        sim.step_trigger()
     else:
         angle = math.ceil(angle) if angle > 0.0 else math.floor(angle)
-
         sim.move(speed, angle * 2)
-        sim.step_trigger()
+
+    sim.step_trigger()
     
     print('\n')
     turn_points.append(sim.get_robot_position())
@@ -79,7 +72,6 @@ def main():
     # подготовка сцены в симуляторе
     sim = server.sim()
 
-    sim.step_enable()
     sim.load_scene(f'{ROOT_DIR}/Scenes/Initial.ttt')
     sim.load_model(f'{ROOT_DIR}/Models/KUKA YouBot_2.ttm')
     sim.replace_robot(0, 0, 0.1)

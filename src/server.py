@@ -76,7 +76,19 @@ class sim():
 
     def get_lidar_data(self):
         ranges = self.sim.getStringSignal('scan ranges')
-        lidar = [ray[0] for ray in struct.iter_unpack('<f', ranges)]
+        lidar = [
+            ray[0]
+            for ray in struct.iter_unpack('<f', ranges)
+            ]
         
         return lidar
 
+    def get_lidar_inv(self):
+        ranges = self.sim.getStringSignal('scan ranges')
+        lidar = [
+            ray[0] if ray[0] != 0.0 else 1.5
+            for ray in struct.iter_unpack('<f', ranges)
+            ]
+        print(lidar)
+        
+        return lidar
