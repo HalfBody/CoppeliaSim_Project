@@ -111,7 +111,6 @@ class Fuzzy():
     def fuz_log(self, lidar_data, target_angle):
         lidar = np.array_split(lidar_data, 5)
         var_data = [min(dist) if min(dist) != 0.0 else 1.5 for dist in lidar]
-        print(var_data)
 
         self.FS.set_variable("L", var_data[4])
         self.FS.set_variable("LF", var_data[3])
