@@ -58,8 +58,6 @@ def control_loop(turn_points, control, target, n, map, sim):
     else:
         angle = math.ceil(angle) if angle > 0.0 else math.floor(angle)
         sim.move(speed, angle * 2)
-
-    sim.step_trigger()
     
     print('\n')
     turn_points.append(sim.get_robot_position())
@@ -104,7 +102,6 @@ def main():
         create_map = map.mapping()
         
         while(True):
-            sim.step_trigger()
             target = target_list[n][i[n]]
 
             control_loop(turn_points, control, target, n, create_map, sim)
