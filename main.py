@@ -12,44 +12,63 @@ from src import fuzzy_logic_python
 # запуск цикла управления 
 def control_loop(turn_points, control, target, n, map, sim):
     # получение угла поворота робота
-    rotation = sim.get_robot_rotation()
+    r_rotation = sim.get_robot_rotation()
+    print('main_control_loop r_rotation: ', r_rotation)
 
-    # описание модуля math_op
-    # получение в цикле угла целевого направления    
-    target_angle = math_op.get_target_angle(sim.get_robot_position(), target, rotation)
+    # получение позиции робота
+    r_position = sim.get_robot_position()
+    print('main_control_loop r_position: ', r_position)
 
-    # функция запуска СУ
-    fuz_control = control.fuz_log([], target_angle, sim)
+    # получение угла целевого направления  
+    target_angle = math_op.get_target_angle(r_position, target, r_rotation) 
+    print('main_control_loop target_angle: ', target_angle)
 
-    # получение уставки на угол от СУ
-    angle = fuz_control.get('angle')
+    # получение значений лидара
+    lidar = sim.get_lidar_data()
+    lidar_cut = [
+        ray
+        if 0.01 < ray and ray <= 2.0 else 2.0
+        for ray in lidar
+    ]
+    
+    # признак детекции препятствия
+    detect = True if min(lidar_cut) <= 1.5 else False
+    print(detect)
 
-    # получение уставки на скорость от СУ
-    speed = math.ceil(fuz_control.get('speed'))
+    # выбор сратегии 
+    # либо уворот от препятствия (препятствие есть),
+    # либо движение к цели (препятствия нет)
+    speed = 0.0
+    angle = 0.0
+    if detect == False:
+        print('Езда к цели')
+        speed = 3
+        if(abs(target_angle) >= 0.5):
+            angle = target_angle 
+        else:
+            angle = target_angle / abs(target_angle)
+    else:
+        print('Уворот от препятствия')
+        # функция запуска СУ
+        fuz_control = control.fuz_log(lidar_cut, target_angle)
+        # получение уставки на угол от СУ
+        angle = fuz_control.get('angle')
+        # получение уставки на скорость от СУ
+        speed = math.ceil(fuz_control.get('speed'))
 
-    print ('Мгновенные значения управления и ориентации: ', angle, ' - угол СУ, ', speed, ' - скорость усл.ед, ', rotation, target_angle)
-    #server_req.print_to_console(f'Control loop:\nAngle: {angle}\nSpeed: {speed}\n')
-    # при угле от СУ в некоторых погрешнотях робот движется прямо, если уставка на угол велика - поворот без движения
-    if abs(angle) < 0.00001:
-        #end_time = time.time() + 1
-
-        #while end_time - time.time() > 0.01:
+    print ('Мгновенные значения управления и ориентации: ', angle, ' - угол СУ, ', speed, ' - скорость усл.ед')
+    # при угле от СУ в некоторых погрешнотях робот движется прямо, 
+    # если уставка на угол велика - поворот без движения
+    if abs(angle) < 0.0001:
         sim.move(speed, 0)
-        #time.sleep(3)
         sim.step_trigger()
     else:
-        #sim.turn(angle, 2)
-        #end_time = time.time() + 1
-
-        #while end_time - time.time() > 0.01:
-        angle = math.ceil(angle) if angle > 0 else math.floor(angle)
+        angle = math.ceil(angle) if angle > 0.0 else math.floor(angle)
 
         sim.move(speed, angle * 2)
-        #time.sleep(3)
         sim.step_trigger()
-    print('\n')
     
-    # обновление списка точек поворота и карты
+    print('\n')
     turn_points.append(sim.get_robot_position())
     map.add_points(sim)
 
@@ -91,13 +110,12 @@ def main():
         
         control = fuzzy_logic_python.Fuzzy(LR_arr, LRF_arr)
         create_map = map.mapping()
-
-        sim.step_trigger()
+        
         while(True):
+            sim.step_trigger()
             target = target_list[n][i[n]]
 
             control_loop(turn_points, control, target, n, create_map, sim)
-            sim.step_trigger()
 
             dist = math_op.get_target_dist(sim.get_robot_position(), target)
             if dist < 0.1:
@@ -111,11 +129,9 @@ def main():
         dist = math_op.get_move_dist(turn_points)
         end_time = time.time() - start_time
 
-        #create_map.map_draw()
-        #server_req.print_to_console(f'Robot num: {n}\nGOAL ACHIEVED\nWork time: {end_time}\nTravel distance: {dist}')
+        create_map.map_draw()
 
         sim.stop_sim()
-        time.sleep(3)
 
 
 if __name__ == "__main__":

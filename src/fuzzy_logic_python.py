@@ -1,3 +1,4 @@
+import numpy as np
 from simpful import *
 
 
@@ -26,23 +27,24 @@ class Fuzzy():
         R = TrapezoidFuzzySet(a=60, b=30, c=180, d=180, term = 'R')
         self.FS.add_linguistic_variable('target_angle', LinguisticVariable([L, LF, F, RF, R], concept='angle to target', universe_of_discourse=[-180,180]))
 
-        LS = TrapezoidFuzzySet(a=-2, b=-1.5, c=-1, d=-0.5, term = 'LS')
-        LM = TrapezoidFuzzySet(a=-1.5, b=-1, c=-0.5, d=-0, term = 'LM')
-        F = TriangleFuzzySet(a=-0.5, b=0, c=0.5, term='F')
-        RM = TrapezoidFuzzySet(a=0, b=0.5, c=1, d=1.5, term = 'RM')
-        RS = TrapezoidFuzzySet(a=0.5, b=1, c=1.5, d=2, term = 'RS')
-        self.FS.add_linguistic_variable('angle', LinguisticVariable([LS, LM, F, RM, RS], concept='turn angle', universe_of_discourse=[-90,90]))
+        LS = TrapezoidFuzzySet(a=-0.5, b=-0.4, c=-0.3, d=-0.2, term = 'LS')
+        LM = TrapezoidFuzzySet(a=-0.3, b=-0.3, c=-0.2, d=-0.1, term = 'LM')
+        F = TriangleFuzzySet(a=-0.1, b=0, c=0.1, term='F')
+        RM = TrapezoidFuzzySet(a=0.1, b=0.2, c=0.3, d=0.3, term = 'RM')
+        RS = TrapezoidFuzzySet(a=0.2, b=0.3, c=0.4, d=0.5, term = 'RS')
+        self.FS.add_linguistic_variable('angle', LinguisticVariable([LS, LM, F, RM, RS], concept='turn angle', universe_of_discourse=[-0.5,0.5]))
 
-        #LS = TrapezoidFuzzySet(a=-1.6, b=-1.5, c=-1.5, d=-0.5, term = 'LS')
-        #LM = TrapezoidFuzzySet(a=-1, b=-1.5, c=-1.3, d=-0, term = 'LM')
-        #F = TriangleFuzzySet(a=-0.5, b=0, c=0.5, term='F')
-        #RM = TrapezoidFuzzySet(a=0, b=1, c=1.5, d=1, term = 'RM')
-        #RS = TrapezoidFuzzySet(a=0.5, b=1.3, c=1.5, d=1.6, term = 'RS')
-        #self.FS.add_linguistic_variable('angle', LinguisticVariable([LS, LM, F, RM, RS], concept='turn angle', universe_of_discourse=[-90,90]))
+        # LS = TrapezoidFuzzySet(a=-2, b=-1.5, c=-1, d=-0.5, term = 'LS')
+        # LM = TrapezoidFuzzySet(a=-1.5, b=-1, c=-0.5, d=-0, term = 'LM')
+        # F = TriangleFuzzySet(a=-0.5, b=0, c=0.5, term='F')
+        # RM = TrapezoidFuzzySet(a=0, b=0.5, c=1, d=1.5, term = 'RM')
+        # RS = TrapezoidFuzzySet(a=0.5, b=1, c=1.5, d=2, term = 'RS')
+        # self.FS.add_linguistic_variable('angle', LinguisticVariable([LS, LM, F, RM, RS], concept='turn angle', universe_of_discourse=[-90,90]))
 
+        reverse = TriangleFuzzySet(a = -2, b = -1.5, c = 0, term = 'reverse')
         slow = TriangleFuzzySet(a=1, b=1.5, c=2, term='slow')
         normal = TriangleFuzzySet(a=2.5, b=3, c=3.5, term='normal')
-        self.FS.add_linguistic_variable('speed', LinguisticVariable([slow, normal], concept='speed', universe_of_discourse=[0,3]))
+        self.FS.add_linguistic_variable('speed', LinguisticVariable([reverse, slow, normal], concept='speed', universe_of_discourse=[-1,3]))
 
         rules = []
         rules.append('IF (L IS n) THEN (angle IS RM)')
@@ -56,24 +58,46 @@ class Fuzzy():
         rules.append('IF (L IS n) AND (LF IS n) THEN (angle IS RS)')
         rules.append('IF (R IS n) AND (RF IS n) THEN (angle IS LS)')
 
-        rules.append('IF (target_angle IS L) THEN (angle IS LS)')
-        rules.append('IF (target_angle IS LF) THEN (angle IS LM)')
-        rules.append('IF (target_angle IS R) THEN (angle IS RS)')
-        rules.append('IF (target_angle IS RF) THEN (angle IS RM)')
-        rules.append('IF (target_angle IS F) THEN (angle IS F)')
+        rules.append('IF (L IS m) THEN (angle IS F)')
+        rules.append('IF (LF IS m) THEN (angle IS RM)')
+        rules.append('IF (RF IS m) THEN (angle IS LM)')
+        rules.append('IF (R IS m) THEN (angle IS F)')
+        rules.append('IF (L IS m) AND (LF IS m) AND (F IS m) THEN (angle IS RM)')
+        rules.append('IF (LF IS m) AND (F IS m) THEN (angle IS RS)')
+        rules.append('IF (R IS m) AND (RF IS m) AND (F IS m) THEN (angle IS LM)')
+        rules.append('IF (RF IS m) AND (F IS m) THEN (angle IS LM)')
+        rules.append('IF (L IS m) AND (LF IS m) THEN (angle IS RM)')
+        rules.append('IF (R IS m) AND (RF IS m) THEN (angle IS LM)')
 
-        rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS LF) THEN (angle IS LM)')
-        rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS RF) THEN (angle IS RM)')
-        rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS L) THEN (angle IS LS)')
-        rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS R) THEN (angle IS RS)')
-        rules.append('IF (LF IS n) AND (L IS n) AND (target_angle IS L) THEN (angle IS LS)')
-        rules.append('IF (RF IS n) AND (R IS n) AND (target_angle IS R) THEN (angle IS RS)')
-        rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS F) THEN (angle IS LS)')
+        # rules.append('IF (target_angle IS L) THEN (angle IS LM)')
+        # rules.append('IF (target_angle IS LF) THEN (angle IS LM)')
+        # rules.append('IF (target_angle IS R) THEN (angle IS RM)')
+        # rules.append('IF (target_angle IS RF) THEN (angle IS RM)')
+        # rules.append('IF (target_angle IS F) THEN (angle IS F)')
+
+        # rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS LF) THEN (angle IS LM)')
+        # rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS RF) THEN (angle IS RM)')
+        # rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS L) THEN (angle IS LS)')
+        # rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS R) THEN (angle IS RS)')
+        # rules.append('IF (LF IS n) AND (L IS n) AND (target_angle IS L) THEN (angle IS LS)')
+        # rules.append('IF (RF IS n) AND (R IS n) AND (target_angle IS R) THEN (angle IS RS)')
+        # rules.append('IF (LF IS n) AND (RF IS n) AND (target_angle IS F) THEN (angle IS LS)')
+
+        rules.append('IF (LF IS m) THEN (speed IS noraml)')
+        rules.append('IF (RF IS m) THEN (speed IS normal)')
+        rules.append('IF (L IS m) AND (LF IS m) AND (RF IS m) THEN (speed IS slow)')
+        rules.append('IF (R IS m) AND (LF IS m) AND (RF IS m) THEN (speed IS slow)')
+        rules.append('IF (LF IS m) AND (F IS m) THEN (speed IS slow)')
+        rules.append('IF (RF IS m) AND (F IS m) THEN (speed IS slow)')
+        rules.append('IF (F IS m) THEN (speed IS slow)')
 
         rules.append('IF (LF IS n) THEN (speed IS slow)')
         rules.append('IF (RF IS n) THEN (speed IS slow)')
         rules.append('IF (L IS n) AND (LF IS n) AND (RF IS n) THEN (speed IS slow)')
         rules.append('IF (R IS n) AND (LF IS n) AND (RF IS n) THEN (speed IS slow)')
+        rules.append('IF (LF IS n) AND (F IS n) THEN (speed IS reverse)')
+        rules.append('IF (RF IS n) AND (F IS n) THEN (speed IS reverse)')
+        rules.append('IF (F IS n) THEN (speed IS reverse)')
 
         rules.append('IF (target_angle IS L) THEN (speed IS slow)')
         rules.append('IF (target_angle IS LF) THEN (speed IS normal)')
@@ -84,99 +108,21 @@ class Fuzzy():
         self.FS.add_rules(rules)
 
 
-    def get_lidar_data(self, sim):
-        #print('запуск лидара в управлении логикой')
-        lidar_data = sim.get_lidar_data()
-        #lidar_data = server.get_lidar_data()
-        print('lidar_data')
-        #r, rf, f, lf, l = [], [], [], [], []
-        
-
-        #TestFile = open('./data/xyz.txt','w')
-        #for i in lidar_data:
-        #    TestFile.write(str(i))
-        #    TestFile.write('\n')
-        #TestFile.close()
-
-        #print(len(lidar_data), lidar_data)
-        
-        r_temp, rf_temp, f_temp, lf_temp, l_temp = [], [], [], [], []
-        
-        for i in range(len(lidar_data)):
-
-            if i >= 0 and i < 136:
-                if 0.0 < lidar_data[i] <= 1.5:
-                    r_temp.append(lidar_data[i])
-                else:
-                    r_temp.append(1.5)
-
-            elif i >= 136 and i < 272:
-                if 0.0 < lidar_data[i] <= 1.5:
-                    rf_temp.append(lidar_data[i])
-                else:
-                    rf_temp.append(1.5)
-
-            elif i >= 272 and i < 412:
-                if 0.0 < lidar_data[i] <= 1.5:
-                    f_temp.append(lidar_data[i])
-                else:
-                    f_temp.append(1.5)
-
-            elif i >= 412 and i < 548:
-                if 0.0 < lidar_data[i] <= 1.5:
-                    lf_temp.append(lidar_data[i])
-                else:
-                    lf_temp.append(1.5)
-
-            elif i >= 548 and i < 684:
-                if 0.0 < lidar_data[i] <= 1.5:
-                    l_temp.append(lidar_data[i])
-                else:
-                    l_temp.append(1.5)
-
-        #r_temp, rf_temp, f_temp, lf_temp, l_temp = [], [], [], [], []
-
-#        for i in range(len(r)):
-#            if 0.0 < r[i] <= 1.5:
-#                r_temp.append(r[i])
-#            else:
-#                r_temp.append(1.5)
-#            if 0.0 < rf[i] <= 1.5:
-#                rf_temp.append(rf[i])
-#           else:
-#                rf_temp.append(1.5)
-#            if 0.0 < l[i] <= 1.5:
-#                l_temp.append(l[i])
-#            else:
-#                l_temp.append(1.5)
-#            if 0.0 < lf[i] <= 1.5:
-#                lf_temp.append(lf[i])
-#            else:
-#                lf_temp.append(1.5)
-#            if 0.0 < f[i] <= 1.5:
-#                f_temp.append(f[i])
-#            else:
-#                f_temp.append(1.5)
-
-        l_data = min(l_temp)
-        lf_data = min(lf_temp)
-        f_data = min(f_temp)
-        rf_data = min(rf_temp)
-        r_data = min(r_temp)
-        print('Минимальные значения детектирования для секторов лидара: ', [l_data, lf_data, f_data, rf_data, r_data])
-        return [l_data, lf_data, f_data, rf_data, r_data]
+    def get_lidar_data(self, lidar_data):
+        lidar = np.array_split(lidar_data, 5)
+        var_data = [min(dist) for dist in lidar]
+                    
+        return var_data
         
         
-    def fuz_log(self, lidar_data, target_angle, sim):
-        lidar_data = self.get_lidar_data(sim)
+    def fuz_log(self, lidar_data, target_angle):
+        var_data = self.get_lidar_data(lidar_data)
 
-        self.FS.set_variable("L", lidar_data[0])
-        self.FS.set_variable("LF", lidar_data[1])
-        self.FS.set_variable("F", lidar_data[2])
-        self.FS.set_variable("RF", lidar_data[3])
-        self.FS.set_variable("R", lidar_data[4])
+        self.FS.set_variable("L", var_data[0])
+        self.FS.set_variable("LF", var_data[1])
+        self.FS.set_variable("F", var_data[2])
+        self.FS.set_variable("RF", var_data[3])
+        self.FS.set_variable("R", var_data[4])
         self.FS.set_variable("target_angle", target_angle)
-
-        #server_req.print_to_console(f'Lidar data: {lidar_data[0]}, {lidar_data[1]}, {lidar_data[2]}, {lidar_data[3]}, {lidar_data[4]}\n')
 
         return self.FS.Mamdani_inference(['angle', 'speed'])
