@@ -26,8 +26,8 @@ class Robot():
 
     def lidar(self):
         lidar = []
-        r = 1.5
-        rot = (self.direction + 90) * math.pi / 180
+        r = 2.0
+        rot = (self.direction + 70) * math.pi / 180
 
         for i in range(180):
             angle = i * math.pi / 180
@@ -114,15 +114,18 @@ class Sim():
         lf = []
         l = []
         f = []
+        
+        one_of_five = math.floor(len(lidar)/5)
+        lid_len = len(lidar)
 
         for i in range(len(lidar)):
-            if i < 36:
+            if i < one_of_five:
                 l.append(lidar_temp[i])
-            elif 36 <= i < 72:
+            elif one_of_five <= i < 2 * one_of_five:
                 lf.append(lidar_temp[i])
-            elif 72 <= i < 108:
+            elif 2 * one_of_five <= i < lid_len - 2 * one_of_five:
                 f.append(lidar_temp[i])
-            elif 108 <= i < 144:
+            elif lid_len - 2 * one_of_five <= i < lid_len - one_of_five:
                 rf.append(lidar_temp[i])
             else:
                 r.append(lidar_temp[i])
@@ -145,10 +148,38 @@ class Sim():
 
             for i in lidar_data:
                 min_lidar.append(i)
+
+            # признак детекции препятствия
+            detect = False
+            detect_min = min(lidar_data)
+            #print(detect_min)
+            if(detect_min <= 1.5): detect = True
+
+            # выбор сратегии 
+            # либо уворот от препятствия (препятствие есть),
+            # либо движение к цели (препятствия нет)
+            speed = 0.0
+            angle = 0.0
+
+            if(detect == False):
+                #print('Езда к цели')
+                speed = 2
+                if(abs(turn_angle) >= 0.5):
+                    angle = turn_angle 
+                else:
+                    angle = turn_angle/abs(turn_angle)
+            else:
+                #print('Уворот от препятствия')
+                # функция запуска СУ
+                fuz_control = self.control.fuz_log(lidar_data, turn_angle, sim)
+                # получение уставки на угол от СУ
+                angle = fuz_control.get('angle')
+                # получение уставки на скорость от СУ
+                speed = math.ceil(fuz_control.get('speed'))
                 
-            fuz_control = self.control.fuz_log(lidar_data, turn_angle, 0)
-            angle = fuz_control.get('angle')
-            speed = fuz_control.get('speed')
+            # fuz_control = self.control.fuz_log(lidar_data, turn_angle, 0)
+            # angle = fuz_control.get('angle')
+            # speed = fuz_control.get('speed')
 
             robot.turn(angle)
             robot.movement(speed)

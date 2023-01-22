@@ -8,22 +8,22 @@ import os
 
 
 # запуск цикла управления 
-def main_control_loop(turn_points, control, target, n, map, sim):
+def main_control_loop(turn_points, control, target, n, map, sim, mode):
 
     # получение угла поворота робота
     r_rotation = sim.get_robot_rotation()
-    print('main_control_loop r_rotation: ', r_rotation)
+    if mode == True: print('main_control_loop r_rotation: ', r_rotation) #
 
     # получение позиции робота
     r_position = sim.get_robot_position()
-    print('main_control_loop r_position: ', r_position)
+    if mode == True: print('main_control_loop r_position: ', r_position) # возвращает значение в радианах
 
     # получение угла целевого направления  
-    target_angle = math_op.get_target_angle(r_position, target, r_rotation) 
-    print('main_control_loop target_angle: ', target_angle)
+    target_angle = math_op.get_target_angle(r_position, target, r_rotation, mode) 
+    if mode == True: print('main_control_loop target_angle: ', target_angle)
 
     # получение значений лидара
-    lidar = sim.get_lidar_data()
+    lidar = sim.get_lidar_data(mode)
     lidar_cut = []
     for i in lidar:
         if i == 0.0:
@@ -35,7 +35,7 @@ def main_control_loop(turn_points, control, target, n, map, sim):
     # признак детекции препятствия
     detect = False
     detect_min = min(lidar_cut)
-    print(detect_min)
+    if mode == True: print(detect_min)
     if(detect_min <= 1.5): detect = True
 
     # выбор сратегии 
@@ -43,41 +43,49 @@ def main_control_loop(turn_points, control, target, n, map, sim):
     # либо движение к цели (препятствия нет)
     speed = 0.0
     angle = 0.0
+
+    turn_points.append(r_position)
+    map.add_points(r_position, r_rotation, lidar)
+
     if(detect == False):
-        print('Езда к цели')
-        speed = 3
-        if(abs(target_angle) >= 0.5):
+        if mode == True: print('Езда к цели')
+        speed = 2
+        if(abs(target_angle) <= 0.5):
             angle = target_angle 
         else:
-            angle = target_angle/abs(target_angle)
+            angle = 0.5
     else:
-        print('Уворот от препятствия')
+        if mode == True: print('Уворот от препятствия')
         # функция запуска СУ
-        fuz_control = control.fuz_log(lidar, target_angle, sim)
+        fuz_control = control.fuz_log(lidar, target_angle, sim, mode)
         # получение уставки на угол от СУ
         angle = fuz_control.get('angle')
         # получение уставки на скорость от СУ
         speed = math.ceil(fuz_control.get('speed'))
-    #speed = 0
-
-
-    print ('Мгновенные значения управления и ориентации: ', angle, ' - угол СУ, ', speed, ' - скорость усл.ед')
+    
+    if mode == True: print ('Мгновенные значения управления и ориентации: ', angle, ' - угол СУ, ', speed, ' - скорость усл.ед')
     # при угле от СУ в некоторых погрешнотях робот движется прямо, 
     # если уставка на угол велика - поворот без движения
-    if 0.0001 > angle > -0.0001:
-        sim.move(speed, 0)
-        sim.step_trigger()
+
+    # angle = 0
+    # speed = 0
+
+    if 0.01 > angle > -0.01:
+        sim.move(speed, 0, mode)
+        #sim.step_trigger()
     else:
         if angle > 0:
             angle = math.ceil(angle)
         if angle < 0:
             angle = math.floor(angle)
 
-        sim.move(speed, angle*2)
-        sim.step_trigger()
-    print('\n')
-    turn_points.append(sim.get_robot_position())
-    map.add_points(sim)
+        sim.move(speed, angle, mode)
+        #sim.step_trigger()
+
+    if mode == True: print('\n')
+
+    # turn_points.append(sim.get_robot_position())
+    # map.add_points(sim)
 
 if __name__ == "__main__":
     
@@ -86,7 +94,7 @@ if __name__ == "__main__":
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     
     # подготовка сцены в симуляторе
-    sim.step_enable()
+    #sim.step_enable()
     sim.load_scene(f'{ROOT_DIR}\Scenes\Initial.ttt')
     sim.load_model(f'{ROOT_DIR}\Models\KUKA YouBot_2.ttm')
     sim.replace_robot(0, 0, 0.1)
@@ -115,31 +123,35 @@ if __name__ == "__main__":
         n = 0
 
         start_time = time.time()
-        sim.step_trigger()
+        #sim.step_trigger()
+        mode = True
 
         count = 0
-        while(count == 0):
-            
-            target = target_list[n][i[n]]
-            
-            main_control_loop(turn_points, control, target, n, create_map, sim)
-            
-            sim.step_trigger()
 
-            dist = math_op.get_target_dist(sim.get_robot_position(), target)
+        target = target_list[n][i[n]]
+        
+        while(True):
+            
+            #target = target_list[n][i[n]]
+            
+            main_control_loop(turn_points, control, target, n, create_map, sim, mode)
+            
+            #sim.step_trigger()
+
+            dist = math_op.get_target_dist(sim.get_robot_position(), target, mode)
             
             if dist < 0.1:
                 
                 i[n] += 1
                 if i[n] == len(target_list[0]):
-                    sim.move(0, 0)
+                    sim.move(0, 0, mode)
                     turn_points.append(sim.get_robot_position())
                     break
 
-            #count+=1
+            count+=1
 
         
-        dist = math_op.get_move_dist(turn_points)
+        dist = math_op.get_move_dist(turn_points, mode)
         end_time = time.time() - start_time
 
         create_map.map_draw()

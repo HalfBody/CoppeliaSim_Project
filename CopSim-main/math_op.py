@@ -1,9 +1,6 @@
 import math
 
-import server
-
-
-def get_target_angle(robot_position, target_position, robot_oriantation):
+def get_target_angle(robot_position, target_position, robot_oriantation, mode):
     x = math.sin(robot_oriantation)
     y = -math.cos(robot_oriantation)
 
@@ -18,17 +15,17 @@ def get_target_angle(robot_position, target_position, robot_oriantation):
     angle = angle*180/3.14
 
     direction = robot_vec[0] * target_vec[1] - robot_vec[1] * target_vec[0]
-    print('math_op.get_target_angle: ', angle)
+    if mode == True: print('math_op.get_target_angle: ', angle)
     if direction >= 0:
-        return -angle
+        return -angle*3.14/180
     else:
-        return angle
+        return angle*3.14/180
 
 
-def get_target_dist(robot_position, target_position):
+def get_target_dist(robot_position, target_position, mode):
     target_vec = [target_position[0] - robot_position[0], target_position[1] - robot_position[1]]
     abs_target = math.sqrt(math.pow(target_vec[0], 2) + math.pow(target_vec[1], 2))
-    print('math_op.get_target_dist: ', abs_target)
+    if mode == True: print('math_op.get_target_dist: ', abs_target)
     return abs_target
 
 
@@ -50,9 +47,9 @@ def get_target_dist(robot_position, target_position):
 #     print('get_min_lidar: ', lidar_data_temp)
 #     return min(lidar_data_temp)
 
-def get_move_dist(points):
+def get_move_dist(points, mode):
     dist = 0
     for i in range(len(points)-1):
-        dist += get_target_dist(points[i], points[i+1])
-    print('math_op.get_move_dist: ', dist)
+        dist += get_target_dist(points[i], points[i+1], mode)
+    if mode == True: print('math_op.get_move_dist: ', dist)
     return dist

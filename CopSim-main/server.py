@@ -55,11 +55,12 @@ class sim():
         self.sim.setObjectPosition(self.handles['youBot'], -1,[x, y, z])
 
     
-    def move(self, speed, rotVel):
-        if(rotVel != 0):
-            print('ДВИЖЕНИЕ с поворотом')
-        else:
-            print('ДВИЖЕНИЕ')
+    def move(self, speed, rotVel, mode):
+        if mode == True:
+            if(rotVel != 0):
+                print('ДВИЖЕНИЕ с поворотом')
+            else:
+                print('ДВИЖЕНИЕ')
         self.sim.setJointTargetVelocity(self.handles['rollingJoint_rr'], int(speed) + int(rotVel))
         self.sim.setJointTargetVelocity(self.handles['rollingJoint_rl'], int(speed) - int(rotVel))
         self.sim.setJointTargetVelocity(self.handles['rollingJoint_fr'], int(speed) + int(rotVel))
@@ -95,15 +96,15 @@ class sim():
             #print(self.get_robot_rotation()*180/3.14)
             self.step_trigger()
 
-    def get_lidar_data(self):
-        #print('запуск лидара на сервере')
+    def get_lidar_data(self, mode):
+        if mode == True: print('запуск лидара на сервере')
         ranges = self.sim.getStringSignal('scan ranges')
         #print(len(ranges))
         #print(ranges)
         b=[]
         for i in range(int(len(ranges)/4)):
             b.append(struct.unpack('<f',ranges[4*i:4*(i+1)])[0])
-        print('server.get_lidar_data len(b): ', len(b))
+        if mode == True: print('server.get_lidar_data len(b): ', len(b))
         #print(b)
         lidar = []
         for i in b:
