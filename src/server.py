@@ -89,6 +89,5 @@ class sim():
             ray[0] if ray[0] != 0.0 else 1.5
             for ray in struct.iter_unpack('<f', ranges)
             ]
-        print(lidar)
-        
+            
         return lidar
